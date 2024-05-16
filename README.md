@@ -26,8 +26,8 @@ This Spring Boot project is a web application that allows users to upload PDF fi
 
 1. **Clone the repository**:
     ```bash
-    git clone https://github.com/your-username/file-uploader-encrypt-decrypt.git
-    cd file-uploader-encrypt-decrypt
+    git clone https://github.com/Hamza-Boulila/filewatermark.git
+    cd filewatermark
     ```
 
 2. **Build the project**:
