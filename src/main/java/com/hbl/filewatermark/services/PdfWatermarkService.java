@@ -46,11 +46,11 @@ public class PdfWatermarkService {
                             Element.ALIGN_CENTER,
                             new Phrase( watermark, blackFont),
                             currentPosX, currentPosY, 45);
-                    currentPosX -= watermark.length()*12;
+                    currentPosX -= 100;
                     //300
                 }
                 //300
-                currentPosY -= watermark.length()*12;
+                currentPosY -= 250;
                 currentPosX = pageRect.getWidth();
             }
         }

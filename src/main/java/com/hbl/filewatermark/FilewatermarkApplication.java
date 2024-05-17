@@ -24,10 +24,10 @@ public class FilewatermarkApplication implements CommandLineRunner {
        // byte[] hblsFile = iaesEncryptionDecryption.decrypt(pdfWatermarkService.loadFile("/Users/hbl/IdeaProjects/filewatermark/src/main/resources/static/lpdwwf.pdf"), "HBL");
        // pdfWatermarkService.outputFile(hblsFile, "/Users/hbl/IdeaProjects/filewatermark/src/main/resources/static/decrypted.pdf");
 
-        // byte[] file = pdfWatermarkService.loadFile("/Users/hbl/IdeaProjects/filewatermark/src/main/resources/static/Smallpdf.pdf");
+        byte[] file = pdfWatermarkService.loadFile("/Users/hbl/IdeaProjects/filewatermark/src/main/resources/static/test.pdf");
 
-        // byte[] filewatermarked = pdfWatermarkService.watermarkPdf(file, "TEST | HAZMA@TEST.MA");
+        byte[] filewatermarked = pdfWatermarkService.watermarkPdf(file, "TEST | HAZMA@TEST.MA");
 
-        //pdfWatermarkService.outputFile(filewatermarked, "/Users/hbl/IdeaProjects/filewatermark/src/main/resources/static/watermarked.pdf");
+        pdfWatermarkService.outputFile(filewatermarked, "/Users/hbl/IdeaProjects/filewatermark/src/main/resources/static/watermarked.pdf");
     }
 }

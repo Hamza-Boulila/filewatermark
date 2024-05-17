@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+<script src="/pdfjs-dist/build/pdf.mjs" type="module"></script>
+
+<script type="module">
+    // atob() is used to convert base64 encoded PDF to binary-like data.
+    // (See also https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/
+    // Base64_encoding_and_decoding.)
+
+
+
+
+    function decrypt(text) {
+        let decrypted = "";
+        let shift = 2;
+        for (let i = 0; i < text.length; i++) {
+            let c = text.charCodeAt(i);
+
+            if (c >= 65 && c <= 90) { // Uppercase letters
+                c = (c - 65 - shift + 26) % 26 + 65;
+            } else if (c >= 97 && c <= 122) { // Lowercase letters
+                c = (c - 97 - shift + 26) % 26 + 97;
+            }
+
+            decrypted += String.fromCharCode(c);
+        }
+
+        return decrypted;
+    }
+
+    const encryptedText = '[[${file}]]';
+    const decryptedText = decrypt(encryptedText);
+
+
+    var pdfData = atob(decryptedText);
+
+    // Loaded via <script> tag, create shortcut to access PDF.js exports.
+    var {pdfjsLib} = globalThis;
+
+    // The workerSrc property shall be specified.
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdfjs-dist/build/pdf.worker.mjs';
+
+    // Using DocumentInitParameters object to load binary data.
+    var loadingTask = pdfjsLib.getDocument({data: pdfData});
+    loadingTask.promise.then(function (pdf) {
+        console.log('PDF loaded');
+
+        // Fetch the first page
+        var pageNumber = 1;
+        pdf.getPage(pageNumber).then(function (page) {
+            console.log('Page loaded');
+
+            var scale = 1.5;
+            var viewport = page.getViewport({scale: scale});
+
+            // Prepare canvas using PDF page dimensions
+            var canvas = document.getElementById('the-canvas');
+            var context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            // Render PDF page into canvas context
+            var renderContext = {
+                canvasContext: context,
+                viewport: viewport
+            };
+            var renderTask = page.render(renderContext);
+            renderTask.promise.then(function () {
+                console.log('Page rendered');
+            });
+        });
+    }, function (reason) {
+        // PDF loading error
+        console.error(reason);
+    });
+
+    /**
+     * Get page info from document, resize canvas accordingly, and render page.
+     * @param num Page number.
+     */
+    function renderPage(num) {
+        pageRendering = true;
+        // Using promise to fetch the page
+        pdfDoc.getPage(num).then(function (page) {
+            var viewport = page.getViewport({scale: scale});
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            // Render PDF page into canvas context
+            var renderContext = {
+                canvasContext: ctx,
+                viewport: viewport
+            };
+            var renderTask = page.render(renderContext);
+
+            // Wait for rendering to finish
+            renderTask.promise.then(function () {
+                pageRendering = false;
+                if (pageNumPending !== null) {
+                    // New page rendering is pending
+                    renderPage(pageNumPending);
+                    pageNumPending = null;
+                }
+            });
+        });
+
+        // Update page counters
+        document.getElementById('page_num').textContent = num;
+    }
+
+    /**
+     * If another page rendering in progress, waits until the rendering is
+     * finised. Otherwise, executes rendering immediately.
+     */
+    function queueRenderPage(num) {
+        if (pageRendering) {
+            pageNumPending = num;
+        } else {
+            renderPage(num);
+        }
+    }
+
+    /**
+     * Displays previous page.
+     */
+    function onPrevPage() {
+        if (pageNum <= 1) {
+            return;
+        }
+        pageNum--;
+        queueRenderPage(pageNum);
+    }
+
+    document.getElementById('prev').addEventListener('click', onPrevPage);
+
+    /**
+     * Displays next page.
+     */
+    function onNextPage() {
+        if (pageNum >= pdfDoc.numPages) {
+            return;
+        }
+        pageNum++;
+        queueRenderPage(pageNum);
+    }
+
+    document.getElementById('next').addEventListener('click', onNextPage);
+
+    /**
+     * Asynchronously downloads PDF.
+     */
+    pdfjsLib.getDocument(url).promise.then(function (pdfDoc_) {
+        pdfDoc = pdfDoc_;
+        document.getElementById('page_count').textContent = pdfDoc.numPages;
+
+        // Initial/first page rendering
+        renderPage(pageNum);
+    });
+
+
+</script>
+
+
+
+<h1>PDF.js 'Hello, base64!' example</h1>
+
+<p>Please use <a href="https://mozilla.github.io/pdf.js/getting_started/#download"><i>official releases</i></a> in
+    production environments.</p>
+<div>
+    <button id="prev">Previous</button>
+    <button id="next">Next</button>
+    &nbsp; &nbsp;
+    <span>Page: <span id="page_num"></span> / <span id="page_count"></span></span>
+</div>
+
+    <div class="js-ag-pdf-frame">
+        <div class="ag-pdf-loader" id="js-pdf-loader">
+    </div>
+
+
+    <canvas id="the-canvas"></canvas>
+
+</body>
+</html>
